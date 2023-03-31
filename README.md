@@ -9,12 +9,13 @@ Q2-HUMAnN3 requires metaphlan2.py is in the ``$PATH``. Installation instructions
 You can install the Q2-HUMAnN3 plugin through miniconda:
 
 ```bash
-conda create --name q2-humann3 python=3.7
+wget https://data.qiime2.org/distro/core/qiime2-2023.2-py38-linux-conda.yml
+conda env create -n qiime2-2023.2 --file qiime2-2023.2-py38-linux-conda.yml
 source activate q2-humann3
 conda install numpy
-pip install https://github.com/qiime2/qiime2/archive/master.zip https://github.com/qiime2/q2cli/archive/master.zip https://github.com/qiime2/q2-types/archive/master.zip https://github.com/qiime2/q2-feature-table/archive/master.zip https://github.com/zd200572/q2-humann3/archive/master.zip
-humann2_databases --download uniref uniref90_ec_filtered_diamond .
-humann2_databases --download chocophlan full .
+pip install  https://github.com/zd200572/q2-humann3/archive/master.zip
+humann_databases --download uniref uniref90_ec_filtered_diamond .
+humann_databases --download chocophlan full .
 ```
 
 ## Example
