@@ -10,7 +10,7 @@ from q2_types.per_sample_sequences import \
 
 def _single_sample(sample: str, threads: int, output: str) -> None:
     """Run a single sample through humann2"""
-    cmd = ["humann2", "-i", "%s" % sample, "-o", "%s" % output,
+    cmd = ["humann", "-i", "%s" % sample, "-o", "%s" % output,
            "--threads", "%d" % threads,
            "--output-format", "biom", "--remove-column-description-output"]
     subprocess.run(cmd, check=True)
@@ -19,7 +19,7 @@ def _single_sample(sample: str, threads: int, output: str) -> None:
 def _join_tables(table: str, output: str, name: str) -> None:
     """Merge multiple sample output into single tables"""
     tmp_output = output + '-actual'
-    cmd = ["humann2_join_tables", "-i", table, "-o", tmp_output,
+    cmd = ["humann_join_tables", "-i", table, "-o", tmp_output,
            "--file_name", "%s" % name]
     subprocess.run(cmd, check=True)
 
@@ -35,7 +35,7 @@ def _join_tables(table: str, output: str, name: str) -> None:
 
 def _renorm(table: str, method: str, output: str) -> None:
     """Renormalize a table"""
-    cmd = ["humann2_renorm_table", "-i", "%s" % table, "-o", "%s" % output,
+    cmd = ["humann_renorm_table", "-i", "%s" % table, "-o", "%s" % output,
            "-u", "%s" % method]
     subprocess.run(cmd, check=True)
 
@@ -49,13 +49,13 @@ def run(demultiplexed_seqs: SingleLanePerSampleSingleEndFastqDirFmt,
     samples : SingleLanePerSampleSingleEndFastqDirFmt
         Samples to process
     threads : int
-        The number of threads that humann2 should use
+        The number of threads that humann3 should use
 
     Notes
     -----
     This command consumes per-sample FASTQs, and takes those data through
-    "humann2", then through "humann2_join_tables" and finalizes with
-    "humann2_renorm_table".
+    "humann3", then through "humann_join_tables" and finalizes with
+    "humann_renorm_table".
 
     Returns
     -------
@@ -68,12 +68,12 @@ def run(demultiplexed_seqs: SingleLanePerSampleSingleEndFastqDirFmt,
     """
     import sys
     from distutils.spawn import find_executable
-    if find_executable('metaphlan2.py') is None:
-        sys.stderr.write(("Cannot find metaphlan2.py in $PATH. Please install "
-                          "metaphlan2 prior to installing the q2-humann2 "
+    if find_executable('metaphlan3.py') is None:
+        sys.stderr.write(("Cannot find metaphlan3.py in $PATH. Please install "
+                          "metaphlan2 prior to installing the q2-humann3 "
                           "plugin as it is a required dependency. Details can "
                           "be found here: "
-                          "https://bitbucket.org/biobakery/metaphlan2.\n"))
+                          "https://github.com/biobakery/MetaPhlAn.\n"))
         sys.exit(1)
 
     with tempfile.TemporaryDirectory() as tmp:
