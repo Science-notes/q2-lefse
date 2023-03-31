@@ -10,7 +10,7 @@ plugin = qiime.plugin.Plugin(
     version=q2_humann2.__version__,
     website='http://huttenhower.sph.harvard.edu/humann2',
     package='q2_humann2',
-    user_support_text=("To get help with HUMAnN2, please post a question to "
+    user_support_text=("To get help with HUMAnN3, please post a question to "
                        "the HUMAnN Google Group form: "
                        "https://groups.google.com/forum/#!forum/humann-users"),
     citation_text=None
@@ -18,12 +18,12 @@ plugin = qiime.plugin.Plugin(
 
 
 plugin.methods.register_function(
-    function=q2_humann2.run,
+    function=q2_humann3.run,
     inputs={'demultiplexed_seqs': SampleData[SequencesWithQuality]},
     parameters={'threads': qiime.plugin.Int},
-    name='Characterize samples using HUMAnN2',
+    name='Characterize samples using HUMAnN3',
     outputs=[('genefamilies', FeatureTable[Frequency]),
              ('pathcoverage', FeatureTable[RelativeFrequency]),
              ('pathabundance', FeatureTable[RelativeFrequency])],
-    description='Execute the HUMAnN2'
+    description='Execute the HUMAnN3'
 )
