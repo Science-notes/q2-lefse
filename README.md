@@ -13,6 +13,7 @@ wget https://data.qiime2.org/distro/core/qiime2-2023.2-py38-linux-conda.yml
 conda env create -n qiime2-2023.2 --file qiime2-2023.2-py38-linux-conda.yml
 source activate q2-humann3
 conda install numpy
+conda install -c biobakery humann
 pip install  https://github.com/zd200572/q2-humann3/archive/master.zip
 humann_databases --download uniref uniref90_ec_filtered_diamond .
 humann_databases --download chocophlan full .
