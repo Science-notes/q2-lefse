@@ -16,13 +16,13 @@ setup(
     version=version,
     packages=find_packages(),
     install_requires=['qiime >= 2.0.0',
-                      'humann2 >= 0.9.4, < 1.0.0',
+                      'humann2 >= 3.0.0, < 4.0.0',
                       'biom-format >= 2.1.5, < 2.2.0'],
-    author="Daniel McDonald",
-    author_email="wasade@gmail.com",
-    description="QIIME2 plugin for running HUMAnN2",
+    author="Jiadong ZHao, Daniel McDonald",
+    author_email="zd200572@163.com, wasade@gmail.com",
+    description="QIIME2 plugin for running HUMAnN3",
     entry_points={
         "qiime.plugins":
-        ["q2-humann2=q2_humann2.plugin_setup:plugin"]
+        ["q2-humann2=q2_humann3.plugin_setup:plugin"]
     }
 )
