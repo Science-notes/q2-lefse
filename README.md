@@ -12,7 +12,6 @@ You can install the Q2-HUMAnN3 plugin through miniconda:
 wget https://data.qiime2.org/distro/core/qiime2-2023.2-py38-linux-conda.yml
 conda env create -n q2-humann3 --file qiime2-2023.2-py38-linux-conda.yml
 source activate q2-humann3
-conda install numpy
 conda install -c biobakery humann
 pip install  https://github.com/zd200572/q2-humann3/archive/master.zip
 humann_databases --download uniref uniref90_ec_filtered_diamond .
