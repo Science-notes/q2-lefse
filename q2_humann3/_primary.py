@@ -68,9 +68,9 @@ def run(demultiplexed_seqs: SingleLanePerSampleSingleEndFastqDirFmt,
     """
     import sys
     from distutils.spawn import find_executable
-    if find_executable('metaphlan.py') is None:
-        sys.stderr.write(("Cannot find metaphlan3.py in $PATH. Please install "
-                          "metaphlan2 prior to installing the q2-humann3 "
+    if find_executable('metaphlan') is None:
+        sys.stderr.write(("Cannot find metaphlan in $PATH. Please install "
+                          "metaphlan3 prior to installing the q2-humann3 "
                           "plugin as it is a required dependency. Details can "
                           "be found here: "
                           "https://github.com/biobakery/MetaPhlAn.\n"))
