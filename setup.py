@@ -15,7 +15,7 @@ setup(
     name="q2-humann3",
     version=version,
     packages=find_packages(),
-    install_requires=['qiime >= 2.0.0',
+    install_requires=['qiime2 >= 2020.0.0',
                       'humann3 >= 3.0.0, < 4.0.0',
                       'biom-format >= 2.1.5, < 2.2.0'],
     author="Jiadong ZHao, Daniel McDonald",
