@@ -3,7 +3,7 @@ import tempfile
 import os
 
 import biom
-from q2_types import FeatureTable, Frequency
+from q2_types.feature_table import FeatureTable, Frequency
 from q2_types.per_sample_sequences import \
         SingleLanePerSampleSingleEndFastqDirFmt, FastqGzFormat
 
