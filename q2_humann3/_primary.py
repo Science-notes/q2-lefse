@@ -3,9 +3,9 @@ import tempfile
 import os
 
 import biom
-from q2_types import FeatureTable, Frequency
+from q2_types import (FeatureTable, Frequency)
 from q2_types.per_sample_sequences import \
-        SingleLanePerSampleSingleEndFastqDirFmt, FastqGzFormat
+        (SingleLanePerSampleSingleEndFastqDirFmt, FastqGzFormat)
 
 
 def _single_sample(sample: str, threads: int, output: str) -> None:
@@ -68,7 +68,7 @@ def run(demultiplexed_seqs: SingleLanePerSampleSingleEndFastqDirFmt,
     """
     import sys
     from distutils.spawn import find_executable
-    if find_executable('metaphlan3.py') is None:
+    if find_executable('metaphlan.py') is None:
         sys.stderr.write(("Cannot find metaphlan3.py in $PATH. Please install "
                           "metaphlan2 prior to installing the q2-humann3 "
                           "plugin as it is a required dependency. Details can "
