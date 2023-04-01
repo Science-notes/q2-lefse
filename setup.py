@@ -16,7 +16,7 @@ setup(
     version=version,
     packages=find_packages(),
     install_requires=['qiime2 >= 2020.0.0',
-                      'humann3 >= 3.0.0, < 4.0.0',
+                      'humann >= 3.0.0, < 4.0.0',
                       'biom-format >= 2.1.5, < 2.2.0'],
     author="Jiadong ZHao, Daniel McDonald",
     author_email="zd200572@163.com, wasade@gmail.com",
