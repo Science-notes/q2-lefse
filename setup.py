@@ -23,6 +23,6 @@ setup(
     description="QIIME2 plugin for running HUMAnN3",
     entry_points={
         "qiime.plugins":
-        ["q2-humann2=q2_humann3.plugin_setup:plugin"]
+        ["q2-humann3=q2_humann3.plugin_setup:plugin"]
     }
 )
