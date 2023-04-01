@@ -1,13 +1,13 @@
-import qiime.plugin
+import qiime2.plugin
 from q2_types import (SampleData, SequencesWithQuality, FeatureTable,
                       Frequency, RelativeFrequency)
 
-import q2_humann2
+import q2_humann3
 
 
-plugin = qiime.plugin.Plugin(
-    name='humann2',
-    version=q2_humann2.__version__,
+plugin = qiime2.plugin.Plugin(
+    name='humann3',
+    version=q2_humann3.__version__,
     website='http://huttenhower.sph.harvard.edu/humann2',
     package='q2_humann2',
     user_support_text=("To get help with HUMAnN3, please post a question to "
