@@ -1,6 +1,7 @@
 import qiime2.plugin
-from q2_types import (SampleData, SequencesWithQuality, FeatureTable,
-                      Frequency, RelativeFrequency)
+from q2_types.sample_data import SampleData
+from q2_types.per_sample_sequences import SequencesWithQuality
+from q2_types.feature_table import Frequency, RelativeFrequency
 
 import q2_humann3
 
