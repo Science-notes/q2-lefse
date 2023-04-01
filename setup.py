@@ -22,7 +22,7 @@ setup(
     author_email="zd200572@163.com, wasade@gmail.com",
     description="QIIME2 plugin for running HUMAnN3",
     entry_points={
-        "qiime.plugins":
+        "qiime2.plugins":
         ["q2-humann3=q2_humann3.plugin_setup:plugin"]
     }
 )
