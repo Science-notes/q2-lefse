@@ -10,7 +10,7 @@ You can install the Q2-HUMAnN3 plugin through miniconda:
 
 ```bash
 wget https://data.qiime2.org/distro/core/qiime2-2023.2-py38-linux-conda.yml
-conda env create -n qiime2-2023.2 --file qiime2-2023.2-py38-linux-conda.yml
+conda env create -n q2-humann3 --file qiime2-2023.2-py38-linux-conda.yml
 source activate q2-humann3
 conda install numpy
 conda install -c biobakery humann
