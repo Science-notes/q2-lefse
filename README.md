@@ -23,7 +23,7 @@ humann_databases --download chocophlan full .
 The Q2-HUMAnN3 plugin consumes a demultiplexed artifact from QIIME and produces gene family, pathway coverage and pathway abundance BIOM tables. 
 
 ```bash
-qiime2 humann3 run --i-demultiplexed-seqs seqs.qza --output-dir results --p-threads=1
+qiime humann3 run --i-demultiplexed-seqs seqs.qza --output-dir results --p-threads=1
 ```
 
 The produced artifacts can then be fed into downstream QIIME diversity analyses:
