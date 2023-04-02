@@ -6,7 +6,7 @@ QIIME2 plugin for running HUMAnN3. forked from wasade/q2-humann2, not an officia
 
 ## Installation
 
-Q2-HUMAnN3 requires metaphlan2.py is in the ``$PATH``. Installation instructions can be found [here](https://bitbucket.org/biobakery/metaphlan2), and requires approximately several GBs download which is not covered by the installation steps below.
+Q2-HUMAnN3 requires metaphlan is in the ``$PATH``. Installation instructions can be found [here](https://bitbucket.org/biobakery/metaphlan2), and requires approximately several GBs download which is not covered by the installation steps below.
 
 You can install the Q2-HUMAnN3 plugin through miniconda:
 
