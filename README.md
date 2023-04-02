@@ -1,6 +1,6 @@
 # q2-humann3
 
-QIIME2 plugin for running HUMAnN3. forked from wasade/q2-humann2, not an offical version
+QIIME2 plugin for running HUMAnN3. forked from wasade/q2-humann2, not an official version
 ![](https://user-images.githubusercontent.com/20882745/229346119-691da579-ecf6-46e9-836f-aec5007de0da.png)
 
 ## Installation
