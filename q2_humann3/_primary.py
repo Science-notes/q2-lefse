@@ -9,13 +9,13 @@ from q2_types.per_sample_sequences import \
 
 
 def _single_sample(sample: str, threads: int, output: str) -> None:
-    """Run a single sample through humann2"""
+    """Run a lefse analysis"""
     cmd = ["humann", "-i", "%s" % sample, "-o", "%s" % output,
            "--threads", "%d" % threads,
            "--output-format", "biom", "--remove-column-description-output"]
     subprocess.run(cmd, check=True)
 
-
+# focus on the only function ablove until solved
 def _join_tables(table: str, output: str, name: str) -> None:
     """Merge multiple sample output into single tables"""
     tmp_output = output + '-actual'
