@@ -9,11 +9,10 @@ import q2_lefse
 plugin = qiime2.plugin.Plugin(
     name='lefse',
     version=q2_lefse.__version__,
-    website='http://huttenhower.sph.harvard.edu/humann2',
+    website='https://github.com/Science-notes/q2-lefse',
     package='q2_lefse',
     user_support_text=("To get help with lefse, please post a question to "
-                       "the HUMAnN Google Group form: "
-                       "https://groups.google.com/forum/#!forum/humann-users"),
+                       "https://github.com/Science-notes/q2-lefse"),
     citation_text=None
 )
 
