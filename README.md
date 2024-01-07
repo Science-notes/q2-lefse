@@ -1,28 +1,27 @@
-# q2-humann3
+# q2-lefse
+!!!!!!Not ready yet, just a try!
+QIIME2 plugin for running lefse. originally forked from wasade/q2-humann2, not an official version, some import codes edited for new version of qiime2, 2023.2 version tested worked!
 
-QIIME2 plugin for running HUMAnN3. forked from wasade/q2-humann2, not an official version, just changing from version 2 to version 3, some import codes edited for new version of qiime2, 2023.2 version tested worked!
+![lefse](https://github.com/Science-notes/q2-lefse/assets/20882745/8e8a454b-bed2-4946-a325-3972bd45d5ae)
 
-![](https://user-images.githubusercontent.com/20882745/229346119-691da579-ecf6-46e9-836f-aec5007de0da.png)
 
 ## Installation
 
-Q2-HUMAnN3 requires metaphlan is in the ``$PATH``.
+Q2-lefse requires metaphlan is in the ``$PATH``.
 
-You can install the Q2-HUMAnN3 plugin through miniconda:
+You can install the q2-lefse plugin through miniconda:
 
 ```bash
-wget https://data.qiime2.org/distro/core/qiime2-2023.2-py38-linux-conda.yml
-conda env create -n q2-humann3 --file qiime2-2023.2-py38-linux-conda.yml
-source activate q2-humann3
-conda install -c biobakery humann
-pip install  https://github.com/zd200572/q2-humann3/archive/master.zip
-humann_databases --download uniref uniref90_ec_filtered_diamond .
-humann_databases --download chocophlan full .
+wget https://data.qiime2.org/distro/amplicon/qiime2-amplicon-2023.9-py38-linux-conda.yml
+conda env create -n q2-lefse --file qiime2-amplicon-2023.9-py38-linux-conda.yml
+source activate q2-lefse
+conda install -c biobakery lefse
+pip install  https://github.com/Science-notes/q2-lefse/archive/master.zip
 ```
 
 ## Example
 
-The Q2-HUMAnN3 plugin consumes a demultiplexed artifact from QIIME and produces gene family, pathway coverage and pathway abundance BIOM tables. 
+The q2-lefse  plugin consumes a demultiplexed artifact from QIIME and produces gene family, pathway coverage and pathway abundance BIOM tables. 
 
 ```bash
 # import data
