@@ -10,10 +10,10 @@ from qiime2.plugin import SemanticType, model
 from q2_types.sample_data import SampleData
 
 
-DADA2Stats = SemanticType('OTUTable', variant_of=SampleData.field['type'])
+OTUTable = SemanticType('OTUTable', variant_of=SampleData.field['type'])
 
 
-class DADA2StatsFormat(model.TextFileFormat):
+class OTUTableFormat(model.TextFileFormat):
     def validate(*args):
         pass
 
