@@ -8,11 +8,10 @@ from q2_types.per_sample_sequences import \
         SingleLanePerSampleSingleEndFastqDirFmt, FastqGzFormat
 
 
-def _single_sample(sample: str, threads: int, output: str) -> None:
+def _single_analysis(otu: str, output: str) -> None:
     """Run a lefse analysis"""
-    cmd = ["humann", "-i", "%s" % sample, "-o", "%s" % output,
-           "--threads", "%d" % threads,
-           "--output-format", "biom", "--remove-column-description-output"]
+    cmd = ["lefse_format_input.py", "%s" % sample, "%s" % output,
+           "-c 1 -s 2 -u 3 -o 1000000"]
     subprocess.run(cmd, check=True)
 
 # focus on the only function ablove until solved
