@@ -1,47 +1,147 @@
 # q2-lefse
-!!!!!!Not ready yet, just a try!
-QIIME2 plugin for running lefse. originally forked from wasade/q2-humann2, not an official version, some import codes edited for new version of qiime2, 2023.2 version tested worked!
 
-![lefse](https://github.com/Science-notes/q2-lefse/assets/20882745/8e8a454b-bed2-4946-a325-3972bd45d5ae)
+QIIME 2 plugin for running [LEfSe](https://huttenhower.sph.harvard.edu/galaxy/) on tab-delimited OTU-like abundance tables.
 
+## What is implemented
+
+This plugin now provides:
+
+- A custom `OTUTable` semantic type and format.
+- A QIIME 2 method to run `lefse_format_input.py` + `lefse_run.py`.
+- A QIIME 2 visualizer that additionally generates:
+  - `lefse_lda.png`
+  - `lefse_cladogram.png`
+  - `lefse_results.res`
+
+## Python 2.7 compatibility strategy (important)
+
+Many LEfSe distributions still run in Python 2.7, while QIIME 2 plugin runtime is Python 3.
+
+This plugin supports cross-environment execution through `command_prefix`:
+
+- per command via parameter `--p-command-prefix`
+- globally via environment variable `Q2_LEFSE_COMMAND_PREFIX`
+
+Typical setup:
+
+```bash
+conda create -n lefse-py27 python=2.7 lefse -c biobakery -c bioconda
+```
+
+Then call LEfSe from QIIME 2 env using:
+
+```bash
+--p-command-prefix "conda run -n lefse-py27"
+```
+
+or export once:
+
+```bash
+export Q2_LEFSE_COMMAND_PREFIX="conda run -n lefse-py27"
+```
 
 ## Installation
 
-Q2-lefse requires metaphlan is in the ``$PATH``.
-
-You can install the q2-lefse plugin through miniconda:
+Example (inside a QIIME 2 environment):
 
 ```bash
-wget https://data.qiime2.org/distro/amplicon/qiime2-amplicon-2023.9-py38-linux-conda.yml
-conda env create -n q2-lefse --file qiime2-amplicon-2023.9-py38-linux-conda.yml
-source activate q2-lefse
-conda install -c biobakery lefse
-pip install  https://github.com/Science-notes/q2-lefse/archive/master.zip
+pip install .
 ```
 
-## Example
+> LEfSe CLI scripts (`lefse_format_input.py`, `lefse_run.py`,
+> `lefse_plot_res.py`, and `lefse_plot_cladogram.py`) can be provided via
+> command prefix (recommended) instead of direct `$PATH`.
 
-The q2-lefse  plugin consumes a demultiplexed artifact from QIIME and produces gene family, pathway coverage and pathway abundance BIOM tables. 
+## Usage
+
+### 1) Import an OTU table
+
+Prepare a tab-delimited `otu.txt` file (LEfSe-style input table source), then:
 
 ```bash
-# import data
-qiime tools import  --type 'SampleData[SequencesWithQuality]'   --input-path ./01.rawdata/   --input-format CasavaOneEightSingleLanePerSampleDirFmt   --output-path demux-single-end.qza
-# Imported ./01.rawdata/ as CasavaOneEightSingleLanePerSampleDirFmt to demux-single-end.qza
-# run humann3, before this, prepare your databse well, especially in China, some databse may not download fastly, alternative methods can be used to do this.
-qiime humann3 run --i-demultiplexed-seqs demux-single-end.qza --output-dir results --p-threads=1 --o-genefamilies gene --o-pathcoverage pathc --o-pathabundance patha  --verbose
-# Output files will be written to: /tmp/tmpvm4zrc7x
-# Decompressing gzipped file ...
-# Running metaphlan ........
+qiime tools import \
+  --type 'SampleData[OTUTable]' \
+  --input-path otu.txt \
+  --output-path otu-table.qza
 ```
 
-The produced artifacts can then be fed into downstream QIIME diversity analyses:
+### 2) Run LEfSe
 
 ```bash
-# commands adapted from q2-dada2 plugin readme and assumes the file 
-# sample-metadata.tsv is in your current working directory and is relevant for
-# your data
-qiime diversity beta --i-table results/pathcoverage.qza --p-metric braycurtis --o-distance-matrix bray-curtis-dm
-qiime diversity pcoa --i-distance-matrix bray-curtis-dm.qza --o-pcoa bray-curtis-pc
-qiime emperor plot --i-pcoa bray-curtis-pc.qza --m-sample-metadata-file sample-metadata.tsv --o-visualization bray-curtis-emperor
-qiime tools view bray-curtis-emperor.qzv
+qiime lefse run \
+  --i-otu-table otu-table.qza \
+  --p-class-id 1 \
+  --p-subclass-id 2 \
+  --p-subject-id 3 \
+  --p-normalization 1000000 \
+  --p-lda-threshold 2.0 \
+  --p-wilcoxon-alpha 0.05 \
+  --p-kruskal-alpha 0.05 \
+  --p-command-prefix "conda run -n lefse-py27" \
+  --o-lefse-results lefse-results.qza
 ```
+
+### 3) Generate visualization
+
+```bash
+qiime lefse visualize \
+  --i-otu-table otu-table.qza \
+  --p-class-id 1 \
+  --p-subclass-id 2 \
+  --p-subject-id 3 \
+  --p-command-prefix "conda run -n lefse-py27" \
+  --o-visualization lefse-results.qzv
+```
+
+Then inspect via:
+
+```bash
+qiime tools view lefse-results.qzv
+```
+
+## Troubleshooting
+
+### 1) `Command not found: lefse_*`
+Usually means your Python 2.7 LEfSe env is not being used.
+
+- pass `--p-command-prefix "conda run -n lefse-py27"`
+- or export `Q2_LEFSE_COMMAND_PREFIX` before running QIIME2
+
+### 2) `CalledProcessError` with LEfSe stderr
+Run the exact failed command manually (printed in the error) to verify:
+
+- input table format
+- class/subclass/subject column indexes
+- LEfSe env package integrity
+
+### 3) `conda run` is slow on clusters
+Use a lightweight prefix such as `micromamba run -n lefse-py27` if available.
+
+
+
+## Minimal sample data + one-command verification
+
+This repository includes:
+
+- minimal sample table: `examples/minimal_otu.txt`
+- one-command verifier: `scripts/verify_minimal_pipeline.sh`
+
+Run (inside a QIIME 2 env):
+
+```bash
+scripts/verify_minimal_pipeline.sh "conda run -n lefse-py27"
+```
+
+Or rely on env var:
+
+```bash
+export Q2_LEFSE_COMMAND_PREFIX="conda run -n lefse-py27"
+scripts/verify_minimal_pipeline.sh
+```
+
+The script will:
+
+1. import `examples/minimal_otu.txt`
+2. run `qiime lefse run`
+3. run `qiime lefse visualize`
+4. print generated `.qza/.qzv` paths
