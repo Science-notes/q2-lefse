@@ -1,98 +1,164 @@
+import os
+import shlex
+import shutil
 import subprocess
 import tempfile
-import os
+from typing import Optional
 
-import biom
-from q2_types.feature_table import FeatureTable, Frequency
-from q2_types.per_sample_sequences import \
-        SingleLanePerSampleSingleEndFastqDirFmt, FastqGzFormat
+from ._otu import OTUTableFormat
 
 
-def _single_analysis(otu: str, output: str) -> None:
-    """Run a lefse analysis"""
-    cmd = ["lefse_format_input.py", "%s" % sample, "%s" % output,
-           "-c 1 -s 2 -u 3 -o 1000000"]
-    subprocess.run(cmd, check=True)
-
-# focus on the only function ablove until solved
-def _join_tables(table: str, output: str, name: str) -> None:
-    """Merge multiple sample output into single tables"""
-    tmp_output = output + '-actual'
-    cmd = ["humann_join_tables", "-i", table, "-o", tmp_output,
-           "--file_name", "%s" % name]
-    subprocess.run(cmd, check=True)
-
-    # doing convert manually as we need to filter out the leading comment as
-    # humann2_renorm_table cannot handle comment lines
-    for_convert = biom.load_table(tmp_output)
-    lines = for_convert.to_tsv().splitlines()
-    lines = lines[1:]  # drop leading comment
-    with open(output, 'w') as fp:
-        fp.write('\n'.join(lines))
-        fp.write('\n')
+class LefseError(RuntimeError):
+    """Raised when a LEfSe command fails."""
 
 
-def _renorm(table: str, method: str, output: str) -> None:
-    """Renormalize a table"""
-    cmd = ["humann_renorm_table", "-i", "%s" % table, "-o", "%s" % output,
-           "-u", "%s" % method]
-    subprocess.run(cmd, check=True)
+def _resolve_prefix(command_prefix: str) -> list:
+    """Resolve LEfSe execution prefix.
 
-
-def run(demultiplexed_seqs: SingleLanePerSampleSingleEndFastqDirFmt,
-        threads: int=1) -> (biom.Table, biom.Table, biom.Table):
-    """Run samples through humann2
-
-    Parameters
-    ----------
-    samples : SingleLanePerSampleSingleEndFastqDirFmt
-        Samples to process
-    threads : int
-        The number of threads that humann3 should use
-
-    Notes
-    -----
-    This command consumes per-sample FASTQs, and takes those data through
-    "humann3", then through "humann_join_tables" and finalizes with
-    "humann_renorm_table".
-
-    Returns
-    -------
-    biom.Table
-        A gene families table normalized using "cpm"
-    biom.Table
-        A pathway coverage table normalized by relative abundance
-    biom.Table
-        A pathway abundance table normalized by relative abundance
+    Priority:
+    1) method/visualizer parameter ``command_prefix``
+    2) env var ``Q2_LEFSE_COMMAND_PREFIX``
+    3) empty (run directly in current env)
     """
-    import sys
-    from distutils.spawn import find_executable
-    if find_executable('metaphlan') is None:
-        sys.stderr.write(("Cannot find metaphlan in $PATH. Please install "
-                          "metaphlan3 prior to installing the q2-humann3 "
-                          "plugin as it is a required dependency. Details can "
-                          "be found here: "
-                          "https://github.com/biobakery/MetaPhlAn.\n"))
-        sys.exit(1)
+    prefix = command_prefix.strip() if command_prefix else ''
+    if not prefix:
+        prefix = os.environ.get('Q2_LEFSE_COMMAND_PREFIX', '').strip()
+    return shlex.split(prefix) if prefix else []
 
-    with tempfile.TemporaryDirectory() as tmp:
-        iter_view = demultiplexed_seqs.sequences.iter_views(FastqGzFormat)
-        for path, view in iter_view:
-            _single_sample(str(view), threads, tmp)
 
-        final_tables = {}
-        for (name, method) in [('genefamilies', 'cpm'),
-                               ('pathcoverage', 'relab'),
-                               ('pathabundance', 'relab')]:
+def _run_command(cmd):
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except FileNotFoundError as e:
+        raise LefseError(
+            f"Command not found: {cmd[0]}. Please install lefse (Python 2.7 env) and ensure command prefix is correct."
+        ) from e
+    except subprocess.CalledProcessError as e:
+        stderr = e.stderr.strip() if e.stderr else ''
+        stdout = e.stdout.strip() if e.stdout else ''
+        message = '\n'.join(part for part in [stdout, stderr] if part)
+        raise LefseError(
+            f"LEfSe command failed: {' '.join(cmd)}\n{message}"
+        ) from e
 
-            joined_path = os.path.join(tmp, "%s.biom" % name)
-            result_path = os.path.join(tmp, "%s.%s.biom" % (name, method))
 
-            _join_tables(tmp, joined_path, name)
-            _renorm(joined_path, method, result_path)
+def _lefse_cmd(prefix: list, script: str, args: list) -> list:
+    return prefix + [script] + args
 
-            final_tables[name] = biom.load_table(result_path)
 
-    return (final_tables['genefamilies'],
-            final_tables['pathcoverage'],
-            final_tables['pathabundance'])
+def run(
+    otu_table: OTUTableFormat,
+    class_id: int,
+    subclass_id: Optional[int] = None,
+    subject_id: Optional[int] = None,
+    normalization: int = 1000000,
+    lda_threshold: float = 2.0,
+    wilcoxon_alpha: float = 0.05,
+    kruskal_alpha: float = 0.05,
+    command_prefix: str = '',
+) -> OTUTableFormat:
+    """Run LEfSe and return the LEfSe result table.
+
+    Use ``command_prefix`` to run LEfSe in a Python 2.7 environment, e.g.:
+    ``conda run -n lefse-py27``.
+    """
+    prefix = _resolve_prefix(command_prefix)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        formatted = os.path.join(tmpdir, 'lefse_input.in')
+        results = os.path.join(tmpdir, 'lefse_results.res')
+
+        format_args = [
+            str(otu_table),
+            formatted,
+            '-c',
+            str(class_id),
+            '-o',
+            str(normalization),
+        ]
+
+        if subclass_id is not None:
+            format_args.extend(['-s', str(subclass_id)])
+        if subject_id is not None:
+            format_args.extend(['-u', str(subject_id)])
+
+        _run_command(_lefse_cmd(prefix, 'lefse_format_input.py', format_args))
+
+        run_args = [
+            formatted,
+            results,
+            '-a',
+            str(wilcoxon_alpha),
+            '-w',
+            str(kruskal_alpha),
+            '-l',
+            str(lda_threshold),
+        ]
+        _run_command(_lefse_cmd(prefix, 'lefse_run.py', run_args))
+
+        output = OTUTableFormat()
+        shutil.copyfile(results, str(output))
+
+    return output
+
+
+def visualize(
+    otu_table: OTUTableFormat,
+    output_dir: str,
+    class_id: int,
+    subclass_id: Optional[int] = None,
+    subject_id: Optional[int] = None,
+    normalization: int = 1000000,
+    lda_threshold: float = 2.0,
+    wilcoxon_alpha: float = 0.05,
+    kruskal_alpha: float = 0.05,
+    command_prefix: str = '',
+) -> None:
+    """Run LEfSe and write visualization artifacts to ``output_dir``."""
+    prefix = _resolve_prefix(command_prefix)
+    os.makedirs(output_dir, exist_ok=True)
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        formatted = os.path.join(tmpdir, 'lefse_input.in')
+        results = os.path.join(tmpdir, 'lefse_results.res')
+        plot_res = os.path.join(output_dir, 'lefse_lda.png')
+        plot_cladogram = os.path.join(output_dir, 'lefse_cladogram.png')
+
+        format_args = [
+            str(otu_table),
+            formatted,
+            '-c',
+            str(class_id),
+            '-o',
+            str(normalization),
+        ]
+        if subclass_id is not None:
+            format_args.extend(['-s', str(subclass_id)])
+        if subject_id is not None:
+            format_args.extend(['-u', str(subject_id)])
+
+        _run_command(_lefse_cmd(prefix, 'lefse_format_input.py', format_args))
+        _run_command(_lefse_cmd(prefix, 'lefse_run.py', [
+            formatted,
+            results,
+            '-a',
+            str(wilcoxon_alpha),
+            '-w',
+            str(kruskal_alpha),
+            '-l',
+            str(lda_threshold),
+        ]))
+        _run_command(_lefse_cmd(prefix, 'lefse_plot_res.py', [results, plot_res]))
+        _run_command(_lefse_cmd(prefix, 'lefse_plot_cladogram.py', [results, plot_cladogram]))
+
+        shutil.copyfile(results, os.path.join(output_dir, 'lefse_results.res'))
+
+    with open(os.path.join(output_dir, 'index.html'), 'w', encoding='utf-8') as fh:
+        fh.write(
+            '<html><body>'
+            '<h1>LEfSe result</h1>'
+            '<p>Result table: <a href="lefse_results.res">lefse_results.res</a></p>'
+            '<h2>LDA score plot</h2><img src="lefse_lda.png" style="max-width: 100%;" />'
+            '<h2>Cladogram</h2><img src="lefse_cladogram.png" style="max-width: 100%;" />'
+            '</body></html>'
+        )

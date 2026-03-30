@@ -1,0 +1,7 @@
+Feature	S1	S2	S3	S4
+Class	A	A	B	B
+Subclass	A1	A1	B1	B1
+Subject	S1	S2	S3	S4
+k__Bacteria;p__Firmicutes	100	120	10	8
+k__Bacteria;p__Bacteroidetes	5	8	110	130
+k__Bacteria;p__Actinobacteria	40	38	35	33
